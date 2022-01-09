@@ -13,7 +13,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>cryptobank</name>
-	<description>Demo voor crpyto betalingen</description>
+	<description>Demo voor crypto betalingen</description>
 	<properties>
 		<java.version>16</java.version>
 		<maven.compiler.source>1.8</maven.compiler.source>

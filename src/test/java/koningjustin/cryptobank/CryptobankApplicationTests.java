@@ -18,8 +18,8 @@ class CryptobankApplicationTests {
     private TestRestTemplate restTemplate;
 
     @Test
-    public void greetingShouldReturnDefaultMessage() {
-        assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/",
+    void greetingShouldReturnDefaultMessage() {
+        assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/greeting",
                 String.class)).contains("Hello World");
     }
 }
