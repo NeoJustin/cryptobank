@@ -59,13 +59,22 @@ class CryptobankCurrencyTest {
     }
 
     @Test
-    void putsCryptoCurrency() throws Exception {
+    void depositCryptoCurrency() throws Exception {
         createUser(USER1);
         putCryptoCurrency(ImmutableUser.copyOf(USER1)
                 .withCryptoCurrency(ImmutableCryptoCurrency.builder()
                         .worth(5).build()))
                 .andExpect(status().isOk())
                 .andExpect(result -> assertWorth(result, 7));
+    }
+
+    @Test
+    void depositMoreThan200_ForbiddenException() throws Exception {
+        createUser(USER1);
+        putCryptoCurrency(ImmutableUser.copyOf(USER1)
+                .withCryptoCurrency(ImmutableCryptoCurrency.builder()
+                        .worth(201).build()))
+                .andExpect(status().isForbidden());
     }
 
     private ResultActions createUser(User user) throws Exception {
@@ -77,14 +86,7 @@ class CryptobankCurrencyTest {
     private ResultActions putCryptoCurrency(User user) throws Exception {
         return mockMvc.perform(put("/cryptobank/currency")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(user)))
-                .andExpect(status().isOk());
-    }
-
-    private void assertCryptoCurrencyHasBeenStored(MvcResult result, CryptoCurrency cryptoCurrency) throws Exception {
-        Set<CryptoCurrency> myObjects = objectMapper.readValue(result.getResponse().getContentAsString(),
-                objectMapper.getTypeFactory().constructCollectionType(Set.class, CryptoCurrency.class));
-        assertThat(myObjects).contains(cryptoCurrency);
+                .content(objectMapper.writeValueAsString(user)));
     }
 
     private void assertWorth(MvcResult result, int worth) throws Exception {

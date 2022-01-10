@@ -2,6 +2,7 @@ package koningjustin.cryptobank.sturing;
 
 import koningjustin.cryptobank.domain.CryptoCurrency;
 import koningjustin.cryptobank.domain.User;
+import koningjustin.cryptobank.exceptions.DepositIsTooHighException;
 import koningjustin.cryptobank.opslag.CryptobankRepository;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,9 @@ public class CryptobankService {
     }
 
     public User depositCryptoCurrency(User user) {
+        if (user.getCryptoCurrency().getWorth() > 200){
+            throw new DepositIsTooHighException();
+        }
         return repository.depositorCryptoCurrency(user);
     }
 
