@@ -1,14 +1,12 @@
 package koningjustin.cryptobank.controller;
 
-import koningjustin.cryptobank.domain.CryptoCurrency;
-import koningjustin.cryptobank.domain.ImmutableCryptoCurrency;
+import koningjustin.cryptobank.domain.User;
 import koningjustin.cryptobank.sturing.CryptobankService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
-import java.util.UUID;
 
 @Controller
 @RequestMapping("cryptobank")
@@ -25,18 +23,29 @@ public class CryptobankController {
         return service.greet();
     }
 
-    @GetMapping(value = "currency",
+    @GetMapping(value = "users",
             produces = { MediaType.APPLICATION_JSON_VALUE })
-    public @ResponseBody Set<CryptoCurrency> getCryptoCurrency() {
-        return service.getCryptoCurrency();
+    public @ResponseBody Set<User> getCryptoCurrencies() {
+        return service.getUsers();
     }
 
-    @PostMapping(value = "currency",
+    @PostMapping(value = "user",
             consumes = { MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaType.APPLICATION_JSON_VALUE })
-    public @ResponseBody CryptoCurrency createCryptoCurrency(
-            @RequestBody CryptoCurrency cryptoCurrency) {
-        return service.putCryptoCurrency(cryptoCurrency);
+    public @ResponseBody User createCryptoCurrency(
+            @RequestBody User user) {
+        return service.createUser(user);
+    }
+
+    @PutMapping(value = "currency")
+    public @ResponseBody User depositCryptoCurrency(
+            @RequestBody User user) {
+        return service.depositCryptoCurrency(user);
+    }
+
+    @DeleteMapping(value = "deleteAll")
+    public void deleteUsers() {
+        service.deleteUsers();
     }
 
 }

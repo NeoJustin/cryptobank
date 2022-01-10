@@ -3,6 +3,9 @@ package koningjustin.cryptobank;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import koningjustin.cryptobank.domain.CryptoCurrency;
 import koningjustin.cryptobank.domain.ImmutableCryptoCurrency;
+import koningjustin.cryptobank.domain.ImmutableUser;
+import koningjustin.cryptobank.domain.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -10,18 +13,23 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 class CryptobankCurrencyTest {
+
+    private static User USER1 = ImmutableUser.builder()
+            .user(UUID.randomUUID())
+            .cryptoCurrency(ImmutableCryptoCurrency.builder().worth(2).build())
+            .build();
 
     @Autowired
     private MockMvc mockMvc;
@@ -29,40 +37,63 @@ class CryptobankCurrencyTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @BeforeEach
+    void deleteUsers() throws Exception {
+        mockMvc.perform(delete("/cryptobank/deleteAll"))
+                .andExpect(status().isOk());
+    }
+
     @Test
-    void getCrypto_Empty() throws Exception {
-        mockMvc.perform(get("/cryptobank/currency"))
+    void getUsers_Empty() throws Exception {
+        mockMvc.perform(get("/cryptobank/users"))
                 .andExpect(status().isOk())
                 .andExpect(a -> assertThat(a.getResponse().getContentAsString())
                         .isEqualTo("[]"));
     }
 
     @Test
-    void postCryptoCurrency_HasCrypto() throws Exception {
-        CryptoCurrency cryptoCurrency = ImmutableCryptoCurrency.builder()
-                .id(UUID.randomUUID())
-                .worth(1).build();
+    void createOneUser() throws Exception {
+        createUser(USER1)
+                .andExpect(status().isOk())
+                .andExpect(result -> assertUser(result, USER1));
+    }
 
-        mockMvc.perform(post("/cryptobank/currency")
+    @Test
+    void putsCryptoCurrency() throws Exception {
+        createUser(USER1);
+        putCryptoCurrency(ImmutableUser.copyOf(USER1)
+                .withCryptoCurrency(ImmutableCryptoCurrency.builder()
+                        .worth(5).build()))
+                .andExpect(status().isOk())
+                .andExpect(result -> assertWorth(result, 7));
+    }
+
+    private ResultActions createUser(User user) throws Exception {
+        return mockMvc.perform(post("/cryptobank/user")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(cryptoCurrency)))
-                .andExpect(status().isOk())
-                .andExpect(result -> assertWorth(result, 1));
-
-        mockMvc.perform(get("/cryptobank/currency"))
-                .andExpect(status().isOk())
-                .andExpect(a -> assertCryptoCurrencyHasBeenStored(a, cryptoCurrency));
+                .content(objectMapper.writeValueAsString(user)));
     }
 
-    private void assertCryptoCurrencyHasBeenStored(MvcResult a, CryptoCurrency cryptoCurrency) throws Exception {
-        Set<CryptoCurrency> myObjects = objectMapper.readValue(a.getResponse().getContentAsString(),
+    private ResultActions putCryptoCurrency(User user) throws Exception {
+        return mockMvc.perform(put("/cryptobank/currency")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isOk());
+    }
+
+    private void assertCryptoCurrencyHasBeenStored(MvcResult result, CryptoCurrency cryptoCurrency) throws Exception {
+        Set<CryptoCurrency> myObjects = objectMapper.readValue(result.getResponse().getContentAsString(),
                 objectMapper.getTypeFactory().constructCollectionType(Set.class, CryptoCurrency.class));
-        assertThat(myObjects).containsExactly(cryptoCurrency);
+        assertThat(myObjects).contains(cryptoCurrency);
     }
 
-    private void assertWorth(MvcResult a, int worth) throws Exception {
-        CryptoCurrency cryptoCurrency = objectMapper.readValue(a.getResponse().getContentAsString(), CryptoCurrency.class);
-        assertThat(cryptoCurrency.getWorth()).isEqualTo(worth);
+    private void assertWorth(MvcResult result, int worth) throws Exception {
+        User user = objectMapper.readValue(result.getResponse().getContentAsString(), User.class);
+        assertThat(user.getCryptoCurrency().getWorth()).isEqualTo(worth);
     }
 
+    private void assertUser(MvcResult result, User user) throws Exception {
+        User userResponse = objectMapper.readValue(result.getResponse().getContentAsString(), User.class);
+        assertThat(userResponse).isEqualTo(user);
+    }
 }

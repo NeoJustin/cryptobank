@@ -15,7 +15,7 @@ import java.util.UUID;
 @Builder
 public class CryptoCurrencyLombok {
 
-    UUID id;
+    UUID user;
     Integer worth; // In dollars
 
 }

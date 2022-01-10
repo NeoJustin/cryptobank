@@ -1,6 +1,7 @@
 package koningjustin.cryptobank.sturing;
 
 import koningjustin.cryptobank.domain.CryptoCurrency;
+import koningjustin.cryptobank.domain.User;
 import koningjustin.cryptobank.opslag.CryptobankRepository;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +20,20 @@ public class CryptobankService {
         return "Hello World";
     }
 
-    public Set<CryptoCurrency> getCryptoCurrency() {
-        return repository.getCryptoCurrency();
+    public Set<User> getUsers() {
+        return repository.getUsers();
     }
 
-    public CryptoCurrency putCryptoCurrency(CryptoCurrency currency) {
-        return repository.putCryptoCurrency(currency);
+    public User createUser(User user) {
+        return repository.createUser(user);
+    }
+
+    public User depositCryptoCurrency(User user) {
+        return repository.depositorCryptoCurrency(user);
+    }
+
+    public void deleteUsers() {
+        repository.deleteUsers();
+
     }
 }
