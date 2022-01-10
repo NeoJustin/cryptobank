@@ -1,13 +1,14 @@
 package koningjustin.cryptobank.controller;
 
 import koningjustin.cryptobank.domain.CryptoCurrency;
+import koningjustin.cryptobank.domain.ImmutableCryptoCurrency;
 import koningjustin.cryptobank.sturing.CryptobankService;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("cryptobank")
@@ -24,9 +25,19 @@ public class CryptobankController {
         return service.greet();
     }
 
-    @GetMapping(value = "currency")
-    public @ResponseBody List<CryptoCurrency> getCryptoCurrency() {
+    @GetMapping(value = "currency",
+            produces = { MediaType.APPLICATION_JSON_VALUE })
+    public @ResponseBody Set<CryptoCurrency> getCryptoCurrency() {
         return service.getCryptoCurrency();
+    }
+
+    @PostMapping(value = "currency",
+            produces = { MediaType.APPLICATION_JSON_VALUE })
+    public @ResponseBody CryptoCurrency putCryptoCurrency(
+            @RequestBody String worth) {
+        return service.putCryptoCurrency(ImmutableCryptoCurrency.builder()
+                .id(UUID.randomUUID())
+                .worth(Integer.valueOf(worth)).build());
     }
 
 }

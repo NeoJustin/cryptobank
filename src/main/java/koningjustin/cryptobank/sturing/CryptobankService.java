@@ -4,7 +4,7 @@ import koningjustin.cryptobank.domain.CryptoCurrency;
 import koningjustin.cryptobank.opslag.CryptobankRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Set;
 
 @Service
 public class CryptobankService {
@@ -19,8 +19,11 @@ public class CryptobankService {
         return "Hello World";
     }
 
-    public List<CryptoCurrency> getCryptoCurrency() {
+    public Set<CryptoCurrency> getCryptoCurrency() {
         return repository.getCryptoCurrency();
     }
 
+    public CryptoCurrency putCryptoCurrency(CryptoCurrency currency) {
+        return repository.putCryptoCurrency(currency);
+    }
 }
