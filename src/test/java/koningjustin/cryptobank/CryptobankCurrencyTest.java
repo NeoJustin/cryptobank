@@ -30,6 +30,10 @@ class CryptobankCurrencyTest {
             .user(UUID.randomUUID())
             .cryptoCurrency(ImmutableCryptoCurrency.builder().worth(2).build())
             .build();
+    private static User USER2 = ImmutableUser.builder()
+            .user(UUID.randomUUID())
+            .cryptoCurrency(ImmutableCryptoCurrency.builder().worth(42).build())
+            .build();
 
     @Autowired
     private MockMvc mockMvc;
@@ -75,6 +79,19 @@ class CryptobankCurrencyTest {
                 .withCryptoCurrency(ImmutableCryptoCurrency.builder()
                         .worth(201).build()))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void depositOfDifferentUsersDontAddUp() throws Exception {
+        createUser(USER1);
+        createUser(USER2);
+        putCryptoCurrency(ImmutableUser.copyOf(USER1)
+                .withCryptoCurrency(ImmutableCryptoCurrency.builder()
+                        .worth(200).build()));
+        putCryptoCurrency(ImmutableUser.copyOf(USER2)
+                .withCryptoCurrency(ImmutableCryptoCurrency.builder()
+                        .worth(200).build()))
+                .andExpect(result -> assertWorth(result, 242));
     }
 
     private ResultActions createUser(User user) throws Exception {
