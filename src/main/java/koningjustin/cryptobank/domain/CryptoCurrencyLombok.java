@@ -13,6 +13,7 @@ import java.util.UUID;
         as = CryptoCurrencyLombok.class)
 @Value
 @Builder
+// Dit was mijn poging tot lombok toepassen in het domein
 public class CryptoCurrencyLombok {
 
     UUID user;
