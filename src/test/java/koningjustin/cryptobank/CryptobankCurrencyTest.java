@@ -2,14 +2,17 @@ package koningjustin.cryptobank;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import koningjustin.cryptobank.domain.CryptoCurrency;
+import koningjustin.cryptobank.domain.ImmutableCryptoCurrency;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -35,20 +38,26 @@ class CryptobankCurrencyTest {
     }
 
     @Test
-    void putAndGetCrypto_HasCrypto() throws Exception {
+    void postCryptoCurrency_HasCrypto() throws Exception {
+        CryptoCurrency cryptoCurrency = ImmutableCryptoCurrency.builder()
+                .id(UUID.randomUUID())
+                .worth(1).build();
+
         mockMvc.perform(post("/cryptobank/currency")
-                .content("1"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(cryptoCurrency)))
                 .andExpect(status().isOk())
                 .andExpect(result -> assertWorth(result, 1));
+
         mockMvc.perform(get("/cryptobank/currency"))
                 .andExpect(status().isOk())
-                .andExpect(a -> assertCryptoCurrencyHasBeenStored(a));
+                .andExpect(a -> assertCryptoCurrencyHasBeenStored(a, cryptoCurrency));
     }
 
-    private void assertCryptoCurrencyHasBeenStored(MvcResult a) throws Exception {
+    private void assertCryptoCurrencyHasBeenStored(MvcResult a, CryptoCurrency cryptoCurrency) throws Exception {
         Set<CryptoCurrency> myObjects = objectMapper.readValue(a.getResponse().getContentAsString(),
                 objectMapper.getTypeFactory().constructCollectionType(Set.class, CryptoCurrency.class));
-        assertThat(myObjects).hasSize(1);
+        assertThat(myObjects).containsExactly(cryptoCurrency);
     }
 
     private void assertWorth(MvcResult a, int worth) throws Exception {

@@ -32,12 +32,11 @@ public class CryptobankController {
     }
 
     @PostMapping(value = "currency",
+            consumes = { MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaType.APPLICATION_JSON_VALUE })
-    public @ResponseBody CryptoCurrency putCryptoCurrency(
-            @RequestBody String worth) {
-        return service.putCryptoCurrency(ImmutableCryptoCurrency.builder()
-                .id(UUID.randomUUID())
-                .worth(Integer.valueOf(worth)).build());
+    public @ResponseBody CryptoCurrency createCryptoCurrency(
+            @RequestBody CryptoCurrency cryptoCurrency) {
+        return service.putCryptoCurrency(cryptoCurrency);
     }
 
 }
